@@ -22,9 +22,19 @@ class CryptologyFrame: public wxFrame
         CryptologyFrame(wxFrame *frame, const wxString& title);
         ~CryptologyFrame();
 
-        wxButton* embedImageButton;
+
 
     private:
+        wxButton* loadImageButton;
+        wxTextCtrl* txtImageFile;
+        wxStaticText* label1;
+        wxButton* loadImageButton2;
+        wxTextCtrl* txtImageFile2;
+        wxStaticText* label2;
+        wxFileDialog* OpenDialog;
+        wxButton* Encrypt;
+
+
         enum
         {
             idPanel = 1000,
@@ -32,7 +42,12 @@ class CryptologyFrame: public wxFrame
             idMenuEmbedImage,
             idMenuEmbedImage2,
             idMenuDecrypt,
-            idSubmitbutton
+            idLoadButton,
+            idLoadButton2,
+            idTxtBox,
+            idTxtBox2,
+            idLabel,
+            idLabel2
 
         };
         void OnClose(wxCloseEvent& event);
@@ -40,6 +55,7 @@ class CryptologyFrame: public wxFrame
         void OnFirstEncryptMethod(wxCommandEvent& event);
         void OnSecondEncryptMethod(wxCommandEvent& event);
         void OnDecryptMethod(wxCommandEvent& event);
+        void LoadImage(wxCommandEvent& event);
         DECLARE_EVENT_TABLE()
 };
 

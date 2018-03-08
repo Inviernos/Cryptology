@@ -51,13 +51,14 @@ BEGIN_EVENT_TABLE(CryptologyFrame, wxFrame)
     EVT_MENU(idMenuEmbedImage, CryptologyFrame::OnFirstEncryptMethod)
     EVT_MENU(idMenuEmbedImage2, CryptologyFrame::OnSecondEncryptMethod)
     EVT_MENU(idMenuDecrypt, CryptologyFrame::OnDecryptMethod)
-    EVT_BUTTON(idSubmitbutton,CryptologyFrame::OnFirstEncryptMethod)
+    EVT_BUTTON(idLoadButton,CryptologyFrame::LoadImage)
 END_EVENT_TABLE()
 
 
 CryptologyFrame::CryptologyFrame(wxFrame *frame, const wxString& title)
     : wxFrame(frame, -1, title)
 {
+    //add a panel to the background
     wxPanel* panel = new wxPanel(this, idPanel);
 
     // create a menu bar
@@ -70,21 +71,44 @@ CryptologyFrame::CryptologyFrame(wxFrame *frame, const wxString& title)
 
     //create encrypt menu
     wxMenu* encryptMenu = new wxMenu(_T(""));
-    encryptMenu->Append(idMenuEmbedImage, _("&Embed Image to Image"), _("Show info about this application"));
-    encryptMenu->Append(idMenuEmbedImage2, _("&Embed audio to image"), _("Show info about this application"));
-    mbar->Append(encryptMenu, _("&Encrypt"));
+    encryptMenu->Append(idMenuEmbedImage, _("&Image to Image"), _("Show info about this application"));
+    encryptMenu->Append(idMenuEmbedImage2, _("&Audio to Image"), _("Show info about this application"));
+    mbar->Append(encryptMenu, _("&Encode"));
 
     //create decrypt menu
     wxMenu* decryptMenu = new wxMenu(_T(""));
-    decryptMenu->Append(idMenuDecrypt, _("&Decrypt Image from Image"), _("Show info about this application"));
-    mbar->Append(decryptMenu, _("&Decrypt"));
+    decryptMenu->Append(idMenuDecrypt, _("&Image from Image"), _("Show info about this application"));
+    mbar->Append(decryptMenu, _("&Decode"));
 
     SetMenuBar(mbar);
 
     //set up buttons
-    embedImageButton = new wxButton(panel,idSubmitbutton, _T("Encrypt"), wxPoint(50,50),wxSize(50,50));
-    embedImageButton->Show(false);
+    loadImageButton = new wxButton(panel,idLoadButton, _T("Load"), wxPoint(260,50),wxSize(75,25));
+    loadImageButton->Show(false);
 
+    loadImageButton2 = new wxButton(panel,idLoadButton2, _T("Load"), wxPoint(260,110),wxSize(75,25));
+    loadImageButton2->Show(false);
+
+    //set up textboxes
+    txtImageFile = new wxTextCtrl(panel,idTxtBox,_T(""), wxPoint(50,50),wxSize(200,25));
+    txtImageFile->Show(false);
+    txtImageFile->SetEditable(false);
+
+    txtImageFile2 = new wxTextCtrl(panel,idTxtBox2,_T(""), wxPoint(50,110),wxSize(200,25));
+    txtImageFile2->Show(false);
+    txtImageFile2->SetEditable(false);
+
+
+    //set up labels
+    label1 = new wxStaticText(panel,idLabel,_T("Load Image To Hide"),wxPoint(50,30));
+    label1->Show(false);
+
+    label2 = new wxStaticText(panel,idLabel2,_T("Load Cover Image"),wxPoint(50,90));
+    label2->Show(false);
+
+    //set up dialogs
+    OpenDialog = new wxFileDialog(this, _("Choose a file to open"), wxEmptyString, wxEmptyString,
+                                "Images files (*.bmp;)|*.bmp;",wxFD_OPEN, wxDefaultPosition);
 }
 
 
@@ -107,7 +131,12 @@ void CryptologyFrame::OnFirstEncryptMethod(wxCommandEvent &event)
 {
     wxString msg = "I finally made another menu";
     wxMessageBox(msg, _("Welcome to Heaven"));
-    embedImageButton->Show(true);
+    loadImageButton->Show(true);
+    loadImageButton2->Show(true);
+    txtImageFile->Show(true);
+    txtImageFile2->Show(true);
+    label1->Show(true);
+    label2->Show(true);
 
 }
 
@@ -118,9 +147,24 @@ void CryptologyFrame::OnSecondEncryptMethod(wxCommandEvent &event)
     wxMessageBox(msg, _("Welcome to..."));
 }
 
-//the user clicked on first sub menu of Decrypt "Decrypt Image"
+//the user clicked on first sub menu of decrypt "Decrypt Image"
 void CryptologyFrame::OnDecryptMethod(wxCommandEvent &event)
 {
     wxString msg = "I finally made another menu";
     wxMessageBox(msg, _("Welcome to..."));
+}
+
+//the user clicked on load button
+void CryptologyFrame::LoadImage(wxCommandEvent &event)
+{
+    //user selects a bitmap file and hits ok
+    if(OpenDialog->ShowModal() == wxID_OK)
+    {
+
+        txtImageFile->SetValue( OpenDialog->GetPath());
+        wxMessageBox("Hello", _("Welcome to AMERICA"));
+    }
+
+    //clean up dialog
+    OpenDialog->Destroy();
 }
