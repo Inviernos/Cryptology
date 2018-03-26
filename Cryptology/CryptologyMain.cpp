@@ -19,8 +19,12 @@
 
 //helper functions
 enum wxbuildinfoformat {
-    short_f, long_f };
+    short_f, long_f
+};
 
+/**
+    Note: the function "_()" takes in a string and handles Unicode characters for localization properly
+**/
 wxString wxbuildinfo(wxbuildinfoformat format)
 {
     wxString wxbuild(wxVERSION_STRING);
@@ -53,7 +57,6 @@ BEGIN_EVENT_TABLE(CryptologyFrame, wxFrame)
     EVT_MENU(idMenuDecrypt, CryptologyFrame::OnDecryptMethod)
     EVT_BUTTON(idLoadButton,CryptologyFrame::LoadImage)
 END_EVENT_TABLE()
-
 
 CryptologyFrame::CryptologyFrame(wxFrame *frame, const wxString& title)
     : wxFrame(frame, -1, title)
