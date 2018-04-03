@@ -25,14 +25,25 @@ class CryptologyFrame: public wxFrame
 
 
     private:
-        wxButton* loadImageButton;
-        wxTextCtrl* txtImageFile;
+        char state;
+        wxButton* loadButton;
+        wxButton* loadButton2;
+        wxButton* loadButton3;
+        wxButton* encryptButton;
+        wxButton* decryptButton;
+        wxTextCtrl* txtFile;
+        wxTextCtrl* txtFile2;
+        wxTextCtrl* txtMessage;
+        wxTextCtrl* txtDecode;
         wxStaticText* label1;
-        wxButton* loadImageButton2;
-        wxTextCtrl* txtImageFile2;
         wxStaticText* label2;
+        wxStaticText* label3;
+        wxStaticText* label4;
+        wxStaticText* label5;
+        wxStaticText* label6;
+        wxStaticText* label7;
         wxFileDialog* OpenDialog;
-        wxButton* Encrypt;
+        wxFileDialog* OpenDialog2;
 
 
         enum
@@ -41,21 +52,34 @@ class CryptologyFrame: public wxFrame
             idMenuQuit,
             idMenuEmbedImage,
             idMenuEmbedImage2,
+            idMenuEmbedImage3,
             idMenuDecrypt,
             idLoadButton,
             idLoadButton2,
+            idLoadButton3,
+            idEncryptButton,
+            idDecryptButton,
             idTxtBox,
             idTxtBox2,
+            idTxtBox3,
+            idTxtBox4,
             idLabel,
-            idLabel2
+            idLabel2,
+            idLabel3,
+            idLabel4,
+            idLabel5,
+            idLabel6,
+            idLabel7
 
         };
         void OnClose(wxCloseEvent& event);
         void OnQuit(wxCommandEvent& event);
-        void OnFirstEncryptMethod(wxCommandEvent& event);
-        void OnSecondEncryptMethod(wxCommandEvent& event);
-        void OnDecryptMethod(wxCommandEvent& event);
+        void OnImageEncodeMenu(wxCommandEvent& event);
+        void OnTextEncodeMenu(wxCommandEvent& event);
+        void OnFileEncodeMenu(wxCommandEvent& event);
+        void OnDecodeMenu(wxCommandEvent& event);
         void LoadImage(wxCommandEvent& event);
+        void ChangeState();
         DECLARE_EVENT_TABLE()
 };
 
