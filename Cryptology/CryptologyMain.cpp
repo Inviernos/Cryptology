@@ -19,8 +19,12 @@
 
 //helper functions
 enum wxbuildinfoformat {
-    short_f, long_f };
+    short_f, long_f 
+};
 
+/**
+    Note: the function "_()" takes in a string and handles Unicode characters for localization properly
+**/	
 wxString wxbuildinfo(wxbuildinfoformat format)
 {
     wxString wxbuild(wxVERSION_STRING);
