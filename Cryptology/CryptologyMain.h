@@ -15,6 +15,14 @@
 #endif
 
 #include "CryptologyApp.h"
+#include "CImg.h"
+#include <iostream>
+#include <bitset>
+#include <math.h>
+#include <string>
+
+using namespace std;
+using namespace cimg_library;
 
 class CryptologyFrame: public wxFrame
 {
@@ -44,6 +52,43 @@ class CryptologyFrame: public wxFrame
         wxStaticText* label7;
         wxFileDialog* OpenDialog;
         wxFileDialog* OpenDialog2;
+        wxFileDialog* SaveDialog;
+
+        //variables for image to image
+        int cover_image_max_pixels;
+        int hide_image_max_pixels;
+        int max_pixels_to_hide;
+        int color_value;
+        bitset<11> total_bits_image_width;
+        bitset<11> total_bits_image_height;
+        bitset<11> total_bits_cover_image_width;
+        bitset<11> total_bits_cover_image_height;
+        bitset<2> codes;
+        bool isRightSize;
+        int change_bits_per_pixel;
+        int total_bits_per_pixel;
+        int current_x;
+        int current_y;
+        int current_channel;
+        int bit_index;
+        string color;
+        string total_bit_size;
+        bitset<8> letter;
+        bitset<8> red;
+        bitset<8> green;
+        bitset<8> blue;
+        bitset<8> cover_color;
+        bool start_hiding_pixel_data;
+        int hidden_image_width;
+        int hidden_image_height;
+        int stego_image_height;
+        int stego_image_width;
+        bool start_finding_pixel_data;
+        bool keepGoing;
+        bitset<2> bit_data;
+        string total_size_bits;
+
+
 
 
         enum
@@ -79,6 +124,11 @@ class CryptologyFrame: public wxFrame
         void OnFileEncodeMenu(wxCommandEvent& event);
         void OnDecodeMenu(wxCommandEvent& event);
         void LoadImage(wxCommandEvent& event);
+        void LeastSignificantBit(wxCommandEvent&event);
+        void EncodeImagetoImage();
+        void EncodeTexttoImage();
+        void EncodeFiletoImage();
+        void DecodeImage();
         void ChangeState();
         DECLARE_EVENT_TABLE()
 };

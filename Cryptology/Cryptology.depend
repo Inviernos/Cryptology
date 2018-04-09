@@ -2657,11 +2657,16 @@
 1519349589 c:\users\anthony\documents\college\cpp code\cryptology\cryptologyapp.h
 	<wx/app.h>
 
-1522358734 c:\users\anthony\documents\college\cpp code\cryptology\cryptologymain.h
+1523250659 c:\users\anthony\documents\college\cpp code\cryptology\cryptologymain.h
 	<wx/wx.h>
 	"CryptologyApp.h"
+	"CImg.h"
+	<iostream>
+	<bitset>
+	<math.h>
+	<string>
 
-1521405612 source:c:\users\anthony\documents\college\cpp code\cryptology\cryptologymain.cpp
+1523250659 source:c:\users\anthony\documents\college\cpp code\cryptology\cryptologymain.cpp
 	"wx_pch.h"
 	"CryptologyMain.h"
 
