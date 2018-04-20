@@ -20,6 +20,9 @@
 #include <bitset>
 #include <math.h>
 #include <string>
+#include <sstream>
+#include<vector>
+
 
 using namespace std;
 using namespace cimg_library;
@@ -58,6 +61,7 @@ class CryptologyFrame: public wxFrame
         int cover_image_max_pixels;
         int hide_image_max_pixels;
         int max_pixels_to_hide;
+        unsigned int max_letters_to_hide;
         int color_value;
         bitset<11> total_bits_image_width;
         bitset<11> total_bits_image_height;
@@ -86,9 +90,14 @@ class CryptologyFrame: public wxFrame
         bool start_finding_pixel_data;
         bool keepGoing;
         bitset<2> bit_data;
-        string total_size_bits;
+        bitset<16> charSize;
 
-
+        //Yousef
+        bitset<8> b;
+        vector<int> a;
+        int width;
+        int height;
+        unsigned int counter;
 
 
         enum
@@ -130,6 +139,7 @@ class CryptologyFrame: public wxFrame
         void EncodeFiletoImage();
         void DecodeImage();
         void ChangeState();
+        void TextToBinary(string s);
         DECLARE_EVENT_TABLE()
 };
 

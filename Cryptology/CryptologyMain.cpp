@@ -1,7 +1,7 @@
 /***************************************************************
  * Name:      CryptologyMain.cpp
  * Purpose:   Code for Application Frame
- * Author:    Anthony Golubski-Allen, Ibrahim Sardar, Yousef ()
+ * Author:    Anthony Golubski-Allen, Ibrahim Sardar, Yousef Alsaadi()
  * Created:   2018-02-22
  * Copyright: Anthony Golubski-Allen, Ibrahim Sardar, Yousef ()
  * License:
@@ -126,16 +126,16 @@ CryptologyFrame::CryptologyFrame(wxFrame *frame, const wxString& title)
     txtDecode->SetEditable(false);
 
     //set up labels
-    label1 = new wxStaticText(panel,idLabel3, "Write Text To Hide",wxPoint(30,20));
+    label1 = new wxStaticText(panel,idLabel, "Write Text To Hide",wxPoint(30,20));
     label1->Show(false);
 
-    label2 = new wxStaticText(panel,idLabel4, "Load Cover Image",wxPoint(30,80));
+    label2 = new wxStaticText(panel,idLabel2, "Load Cover Image",wxPoint(30,80));
     label2->Show(false);
 
-    label3 = new wxStaticText(panel,idLabel, "Load Image To Hide",wxPoint(30,20));
+    label3 = new wxStaticText(panel,idLabel3, "Load Image To Hide",wxPoint(30,20));
     label3->Show(false);
 
-    label4 = new wxStaticText(panel,idLabel2, "Load Cover Image",wxPoint(30,80));
+    label4 = new wxStaticText(panel,idLabel4, "Load Cover Image",wxPoint(30,80));
     label4->Show(false);
 
 
@@ -145,7 +145,7 @@ CryptologyFrame::CryptologyFrame(wxFrame *frame, const wxString& title)
     label6 = new wxStaticText(panel,idLabel6, "Load Cover Image",wxPoint(30,80));
     label6->Show(false);
 
-    label7 = new wxStaticText(panel,idLabel6, "Load Image To Decode",wxPoint(30,30));
+    label7 = new wxStaticText(panel,idLabel7, "Load Image To Decode",wxPoint(30,30));
     label7->Show(false);
 
     //set up dialogs
@@ -155,13 +155,38 @@ CryptologyFrame::CryptologyFrame(wxFrame *frame, const wxString& title)
     OpenDialog2 = new wxFileDialog(this, "Choose a file to open", wxEmptyString, wxEmptyString,
                                 "",wxFD_OPEN, wxDefaultPosition);
 
-    SaveDialog = new wxFileDialog(this, _("Save XYZ file"), "", "",
+    SaveDialog = new wxFileDialog(this, _("Save file"), "", "",
                        "Images files (*.bmp;)|*.bmp;", wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+
+
+
 }
 
 
 CryptologyFrame::~CryptologyFrame()
 {
+}
+
+void CryptologyFrame::TextToBinary(string s)
+{
+  string s1;
+	string arr;
+	int toint;
+
+	for(unsigned int i=0;i<s.size();i++)
+	{
+     bitset<8>(r);
+		 r=bitset<8>(s.c_str()[i]);
+		 s1=r.to_string();
+
+		 for(unsigned int j=0;j<s1.length();j++)
+		 {
+		 	 arr=s1[j];
+		 	 stringstream geek(arr);
+       geek>>toint;
+       a.push_back(toint);
+		 }
+   }
 }
 
 void CryptologyFrame::OnClose(wxCloseEvent &event)
@@ -273,21 +298,36 @@ void CryptologyFrame::LeastSignificantBit(wxCommandEvent &event)
 {
    if(state == 'A')
    {
-
+      if(txtMessage->IsEmpty() && txtFile2->IsEmpty())
+      {
+         wxMessageBox("Need Cover Image and Secret Message","Message");
+      }
+      else if(txtMessage->IsEmpty())
+      {
+          wxMessageBox("Need a secret message to start the embedding process", "Message");
+      }
+      else if(txtFile2->IsEmpty())
+      {
+          wxMessageBox("Need Cover Image to hide secret message","Message");
+      }
+      else
+      {
+         EncodeTexttoImage();
+      }
    }
    else if(state == 'B')
    {
       if(txtFile->IsEmpty() && txtFile2->IsEmpty())
       {
-          wxMessageBox("Need Cover Image and Hidden Image to Encrypt","Error");
+          wxMessageBox("Need Cover Image and Hidden Image to Encrypt","Message");
       }
       else if(txtFile2->IsEmpty())
       {
-          wxMessageBox("Need Cover Image to Encrypt","Error");
+          wxMessageBox("Need Cover Image to Encrypt","Message");
       }
       else if(txtFile->IsEmpty())
       {
-          wxMessageBox("Need Hidden Image to Encrypt","Error");
+          wxMessageBox("Need Hidden Image to Encrypt","Message");
       }
       else
       {
@@ -298,12 +338,28 @@ void CryptologyFrame::LeastSignificantBit(wxCommandEvent &event)
    else if(state == 'C')
    {
        //Ibrahim's file encrypt
+      if(txtFile->IsEmpty() && txtFile2->IsEmpty())
+      {
+          wxMessageBox("Need Cover Image and File to Encrypt","Message");
+      }
+      else if(txtFile2->IsEmpty())
+      {
+          wxMessageBox("Need Cover Image to Encrypt","Message");
+      }
+      else if(txtFile->IsEmpty())
+      {
+          wxMessageBox("Need File to Encrypt","Message");
+      }
+      else
+      {
+         EncodeFiletoImage();
+      }
    }
    else
    {
        if(txtDecode->IsEmpty())
        {
-           wxMessageBox("Need an image to decrypt","Error");
+           wxMessageBox("Need an image to decrypt","Message");
        }
        else
        {
@@ -315,6 +371,147 @@ void CryptologyFrame::LeastSignificantBit(wxCommandEvent &event)
 
 void CryptologyFrame::EncodeTexttoImage()
 {
+
+  isRightSize = false;
+  change_bits_per_pixel = 3;
+  total_bits_per_pixel = 8;
+  bit_index = 0;
+  start_hiding_pixel_data = false;
+  unsigned char new_pixel_color[] = {0,0,0};
+  counter =0;
+  bool once = false;
+  total_bit_size = "";
+
+  //get message
+  wxString message = txtMessage->GetValue();
+
+  //get cover image
+  CImg<unsigned char> image(txtFile2->GetValue());
+
+  width = image.width();
+  height = image.height();
+
+  //find total amount of pixels from each picture
+  cover_image_max_pixels = height * width;
+
+  //find max amount of characters to hide in cover image
+  max_letters_to_hide = floor((cover_image_max_pixels*change_bits_per_pixel)/total_bits_per_pixel) - 6;
+
+
+  //the message is too large
+  if(message.length() > max_letters_to_hide)
+  {
+    char buffer[20];
+    string maxed = itoa(max_letters_to_hide,buffer,10);
+    wxMessageBox("You can only hide up to" + maxed + " characters.","Error");
+  }
+  else
+  {
+    //find binary value of cover_image width and height
+    total_bits_cover_image_width = (bitset<11>)width;
+    total_bits_cover_image_height = (bitset<11>)height;
+    letter = (bitset<8>)'x';
+    charSize = (bitset<16>)message.length();
+
+    total_bit_size = "01";
+    total_bit_size += total_bits_cover_image_width.to_string();
+    total_bit_size += letter.to_string();
+    total_bit_size += total_bits_cover_image_height.to_string();
+    total_bit_size += charSize.to_string();
+
+    //put it into vector
+    for(unsigned int i = 0; i < total_bit_size.length();i++)
+    {
+       if(total_bit_size[i] == '1')
+       {
+          a.push_back(1);
+       }
+       else
+       {
+         a.push_back(0);
+       }
+
+    }
+    //convert message to binary
+    TextToBinary(message.ToStdString());
+
+    //go through the pixel data
+    for(int y=0;y<height;y++)
+    {
+        for(int x=0;x<width;x++)
+        {
+            if (counter<a.size()-1)
+            {
+                for(int c=0;c<3;c++)
+                {
+
+                    color_value=(int)(image(x,y,0,c));
+                    b=(bitset<8>)color_value;
+
+                    if(!once)
+                    {
+                       b[1] = a[counter];
+                       b[0] = a[counter+1];
+
+                       counter+=2;
+                       once = true;
+                       red = b;
+                    }
+                    else
+                    {
+                      if(c==0)
+                      {
+                          b[0]=a[counter];
+                          red=b;
+                          counter ++;
+
+                      }
+                      if(c==1)
+                      {
+                          b[0]=a[counter];
+                          green =b;
+                          counter++;
+
+                      }
+                      if(c==2)
+                      {
+                          b[0]=a[counter];
+                          blue = b;
+                          counter ++;
+                      }
+                    }
+
+
+                  }//inner loop
+
+                  cout<<endl;
+                  color_value = (int)red.to_ulong();
+                  new_pixel_color[0] = (unsigned char)color_value;
+
+                  color_value = (int)green.to_ulong();
+                  new_pixel_color[1] = (unsigned char)color_value;
+
+                  color_value = (int)blue.to_ulong();
+                  new_pixel_color[2] = (unsigned char)color_value;
+                  image.draw_point(x,y,new_pixel_color);
+
+              }// if statement
+
+        } //middle loop
+
+    }//end of outer loop
+
+     //user needs to save first
+    if(SaveDialog->ShowModal() == wxID_OK)
+    {
+       image.save(SaveDialog->GetPath());
+       wxMessageBox("Stego Image Is Ready", "Message");
+    }
+
+    txtMessage->Clear();
+    txtFile2->Clear();
+  }
+
 
 }
 
@@ -330,7 +527,8 @@ void CryptologyFrame::EncodeImagetoImage()
     bit_index = 0;
     start_hiding_pixel_data = false;
     unsigned char new_pixel_color[] = {0,0,0};
-
+    bool once = false;
+    total_bit_size = "";
 
         //get image to hide
     CImg<unsigned char> hide_image(txtFile->GetValue());
@@ -354,7 +552,12 @@ void CryptologyFrame::EncodeImagetoImage()
       //do not have enough pixels to hide image
       if(hide_image_max_pixels > max_pixels_to_hide)
       {
-        wxMessageBox("Cover image is too small. Resizing hidden image to fit", "Message");
+        if(!once)
+        {
+            wxMessageBox("Cover image is too small. Resizing hidden image to fit", "Message");
+            once = true;
+        }
+
         hide_image.resize_halfXY();
         hide_image_max_pixels = hide_image.height() * hide_image.width();
       }
@@ -374,10 +577,10 @@ void CryptologyFrame::EncodeImagetoImage()
 
     letter = (bitset<8>)'x';
 
-    total_bit_size = total_bits_cover_image_width.to_string();
+    total_bit_size = "10";
+    total_bit_size += total_bits_cover_image_width.to_string();
     total_bit_size += letter.to_string();
     total_bit_size += total_bits_cover_image_height.to_string();
-    total_bit_size += "10";
     total_bit_size += total_bits_image_width.to_string();
     total_bit_size += total_bits_image_height.to_string();
 
@@ -582,13 +785,18 @@ void CryptologyFrame::DecodeImage()
   keepGoing = true;
   unsigned char new_pixel_color[] = {0,0,0};
   bool isFinished = false;
-  total_size_bits = "";
+  bool once = false;
+  total_bit_size = "";
+  string message = "";
+  string bitMessage = "";
+  total_bit_size = "";
+  bitset<1> b;
 
   //open the image
   CImg<unsigned char> stego_image(txtDecode->GetValue());
 
   //make new image
-  CImg<unsigned char> new_image(500,500,1,3,0);
+  CImg<unsigned char> new_image(800,800,1,3,0);
 
   //go through the pixel data of the stego image
   for(int y = 0;y < stego_image.height();y++)
@@ -609,56 +817,42 @@ void CryptologyFrame::DecodeImage()
                 //hide size data first
                 if(!start_finding_pixel_data)
                 {
-                    //get first 2 bits of color
-                    bit_data[1] = cover_color[1];
-                    bit_data[0] = cover_color[0];
 
-                    total_size_bits += bit_data.to_string();
+                    if(!once)
+                    {
+                      //get first 2 bits of color
+                      bit_data[1] = cover_color[1];
+                      bit_data[0] = cover_color[0];
 
-                    bit_index+=2;
+                      total_bit_size += bit_data.to_string();
+
+                      bit_index+=2;
+                      once = true;
+                    }
+
+
 
                     //text to image code
                     if(codes.to_string() == "01")
                     {
+                        b[0] = cover_color[0];
 
-                    }
-                    else if(codes.to_string() == "10") //image to image code
-                    {
-                        //image to image requires 24 more bits
-                        if(bit_index == 72)
+                        total_bit_size += b.to_string();
+
+                        bit_index++;
+
+                        if(bit_index == 48)
                         {
-                            total_bits_image_width = (bitset<11>)total_size_bits.substr(32,43);
-                            hidden_image_width = (int)total_bits_image_width.to_ulong();
-
-                            total_bits_image_height = (bitset<11>)total_size_bits.substr(43,54);
-                            hidden_image_height = (int)total_bits_image_height.to_ulong();
-
-
-                            new_image.resize(hidden_image_width,hidden_image_height);
-                            start_finding_pixel_data = true;
-                            bit_index = 0;
-                        }
-                    }
-                    else if(codes.to_string() == "11")  //file to image code
-                    {
-
-                    }
-                    else //have not received the number code yet
-                    {
-                        //collected 30 bits of data
-                        if(bit_index == 32)
-                        {
-
                             //find total size of cover image
-                           total_bits_cover_image_width = (bitset<11>)total_size_bits.substr(0,11);
+                           total_bits_cover_image_width = (bitset<11>)total_bit_size.substr(2,13);
                            stego_image_width = (int)total_bits_cover_image_width.to_ulong();
 
                            //get letter in middle of size
-                           letter = (bitset<8>)total_size_bits.substr(11,19);
+                           letter = (bitset<8>)total_bit_size.substr(13,21);
                            int val = (int)letter.to_ulong();
                            char l = (char)val;
 
-                           total_bits_cover_image_height = (bitset<11>)total_size_bits.substr(19,30);
+                           total_bits_cover_image_height = (bitset<11>)total_bit_size.substr(21,32);
                            stego_image_height = (int)total_bits_cover_image_height.to_ulong();
 
                            //this image is not been encoded
@@ -669,15 +863,122 @@ void CryptologyFrame::DecodeImage()
                               break;
                            }
 
-                           codes = (bitset<2>)total_size_bits.substr(30,32);
+                            charSize = (bitset<16>)total_bit_size.substr(32,48);
+                            counter = (unsigned int)charSize.to_ulong();
+                            start_finding_pixel_data = true;
+                            bit_index = 0;
+
                         }
+
+                    }
+                    else if(codes.to_string() == "10") //image to image code
+                    {
+                        //get first 2 bits of color
+                        bit_data[1] = cover_color[1];
+                        bit_data[0] = cover_color[0];
+
+                        total_bit_size += bit_data.to_string();
+
+                        bit_index+=2;
+
+                        //image to image requires 24 more bits
+                        if(bit_index == 72)
+                        {
+                            //find total size of cover image
+                            total_bits_cover_image_width = (bitset<11>)total_bit_size.substr(2,13);
+                            stego_image_width = (int)total_bits_cover_image_width.to_ulong();
+
+                            //get letter in middle of size
+                            letter = (bitset<8>)total_bit_size.substr(13,21);
+                            int val = (int)letter.to_ulong();
+                            char l = (char)val;
+
+                            total_bits_cover_image_height = (bitset<11>)total_bit_size.substr(21,32);
+                            stego_image_height = (int)total_bits_cover_image_height.to_ulong();
+
+                            //this image is not been encoded
+                            if(stego_image_width != stego_image.width() || stego_image_height != stego_image.height() || l != 'x')
+                            {
+                               keepGoing = false;
+                               wxMessageBox("There is no decoded image","Message");
+                               break;
+                            }
+
+                            total_bits_image_width = (bitset<11>)total_bit_size.substr(32,43);
+                            hidden_image_width = (int)total_bits_image_width.to_ulong();
+
+                            total_bits_image_height = (bitset<11>)total_bit_size.substr(43,54);
+                            hidden_image_height = (int)total_bits_image_height.to_ulong();
+
+
+                            new_image.resize(hidden_image_width,hidden_image_height);
+                            start_finding_pixel_data = true;
+                            bit_index = 0;
+                        }
+                    }
+                    else if(codes.to_string() == "11")  //file to image code
+                    {
+                        if(bit_index == 32)
+                        {
+                            //find total size of cover image
+                           total_bits_cover_image_width = (bitset<11>)total_bit_size.substr(2,13);
+                           stego_image_width = (int)total_bits_cover_image_width.to_ulong();
+
+                           //get letter in middle of size
+                           letter = (bitset<8>)total_bit_size.substr(13,21);
+                           int val = (int)letter.to_ulong();
+                           char l = (char)val;
+
+                           total_bits_cover_image_height = (bitset<11>)total_bit_size.substr(21,32);
+                           stego_image_height = (int)total_bits_cover_image_height.to_ulong();
+
+                           //this image is not been encoded
+                           if(stego_image_width != stego_image.width() || stego_image_height != stego_image.height() || l != 'x')
+                           {
+                              keepGoing = false;
+                              wxMessageBox("There is no decoded image","Message");
+                              break;
+                           }
+
+                        }
+                    }
+                    else //have not received the number code yet
+                    {
+                        codes = (bitset<2>)total_bit_size;
+
                     }
                 }
                 else
                 {
                     if(codes.to_string() == "01")
                     {
+                        b[0] = cover_color[0];
 
+                        bitMessage += b.to_string();
+
+                        bit_index++;
+
+                        if(bit_index == 8)
+                        {
+
+                           //take 8 bits into a character
+                          letter = (bitset<8>)bitMessage;
+
+                          //add character to message
+                          message += (char)letter.to_ulong();
+
+                          bit_index = 0;
+                          bitMessage = "";
+                          counter--;
+                        }
+
+
+                        if(counter == 0)
+                        {
+                            keepGoing = false;
+                            isFinished = true;
+                            break;
+                        }
                     }
 
                     if(codes.to_string() == "10")
@@ -710,6 +1011,42 @@ void CryptologyFrame::DecodeImage()
                             bit_index = 0;
                             color = "";
                         }
+
+                        if(current_channel == 3)
+                        {
+                            current_channel = 0;
+
+                            //get the values of the new colors
+                            color_value = (int)red.to_ulong();
+                            new_pixel_color[0] = (unsigned char)color_value;
+
+                            color_value = (int)green.to_ulong();
+                            new_pixel_color[1] = (unsigned char)color_value;
+
+                            color_value = (int)blue.to_ulong();
+                            new_pixel_color[2] = (unsigned char)color_value;
+
+                            //draw the pixel
+                            new_image.draw_point(current_x,current_y, new_pixel_color);
+
+                            current_x++;
+
+                            //go to next row of pixels
+                            if(current_x>hidden_image_width-1)
+                            {
+                                current_x=0;
+                                current_y++;
+                            }
+
+                            if(current_y>hidden_image_height-1)
+                            {
+                                 keepGoing = false;
+                                 isFinished = true;
+                                 break;
+                            }
+
+                        }
+
                     }
 
                     if(codes.to_string() == "11")
@@ -718,45 +1055,16 @@ void CryptologyFrame::DecodeImage()
                     }
                 }
 
-                if(current_channel == 3)
+                //does not match
+                if(codes.to_string() == "00")
                 {
-                    current_channel = 0;
-
-                    //get the values of the new colors
-                    color_value = (int)red.to_ulong();
-                    new_pixel_color[0] = (unsigned char)color_value;
-
-                    color_value = (int)green.to_ulong();
-                    new_pixel_color[1] = (unsigned char)color_value;
-
-                    color_value = (int)blue.to_ulong();
-                    new_pixel_color[2] = (unsigned char)color_value;
-
-                    //draw the pixel
-                    new_image.draw_point(current_x,current_y, new_pixel_color);
-
-                    current_x++;
-
-
-                    //go to next row of pixels
-                    if(current_x>hidden_image_width-1)
-                    {
-                        current_x=0;
-                        current_y++;
-                    }
-
-                    if(current_y>hidden_image_height-1)
-                    {
-                         keepGoing = false;
-                         isFinished = true;
-                         break;
-                    }
-
+                   wxMessageBox("WHY!!!");
+                   keepGoing = false;
+                   break;
                 }
-
             }
 
-            //this image is not decoded
+            //its done
             if(!keepGoing)
             {
                 break;
@@ -778,11 +1086,28 @@ void CryptologyFrame::DecodeImage()
       //user needs to save
       if(SaveDialog->ShowModal() == wxID_OK)
       {
-        new_image.save(SaveDialog->GetPath());
-        wxMessageBox("Image has been decoded", "Message");
+
+        if(codes.to_string() == "01")
+        {
+           unsigned char colors[] = {255,255,255};
+
+           new_image.draw_text(0,0,message.c_str(),colors,0,1,23);
+           new_image.save(SaveDialog->GetPath());
+           wxMessageBox("Text has been decoded", "Message");
+
+
+        }
+        else
+        {
+          new_image.save(SaveDialog->GetPath());
+          wxMessageBox("Image has been decoded", "Message");
+        }
+
+
       }
   }
 
+  new_image.display();
   txtDecode->Clear();
 }
 
